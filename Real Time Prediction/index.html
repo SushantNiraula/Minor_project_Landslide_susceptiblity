@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Landslide Risk Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .risk-indicator {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .Low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .Moderate {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .High {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .Very.High {
+            background-color: #dc3545;
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Real-time Landslide Risk Monitoring System</h1>
+            <p>Last updated: <span id="last-updated">Never</span></p>
+        </div>
+        
+        <div class="card">
+            <h2>Current Risk Status</h2>
+            <div id="risk-indicator" class="risk-indicator Low">
+                <h1 id="risk-level">Low</h1>
+                <p id="risk-description">No immediate risk of landslide.</p>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h2>Current Sensor Readings</h2>
+                <table id="sensor-data">
+                    <tr>
+                        <th>Sensor</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Temperature (°C)</td>
+                        <td id="temperature">--</td>
+                    </tr>
+                    <tr>
+                        <td>Humidity (%)</td>
+                        <td id="humidity">--</td>
+                    </tr>
+                    <tr>
+                        <td>Precipitation (mm)</td>
+                        <td id="precipitation">--</td>
+                    </tr>
+                    <tr>
+                        <td>Soil Moisture (%)</td>
+                        <td id="soil-moisture">--</td>
+                    </tr>
+                    <tr>
+                        <td>Elevation (m)</td>
+                        <td id="elevation">--</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>Risk Probability</h2>
+                <div class="chart-container">
+                    <canvas id="probability-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Parameter History (Last 24 Hours)</h2>
+            <div class="chart-container">
+                <canvas id="history-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        const probabilityChart = new Chart(
+            document.getElementById('probability-chart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: ['Low', 'Moderate', 'High', 'Very High'],
+                    datasets: [{
+                        label: 'Risk Probability (%)',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#28a745',
+                            '#ffc107',
+                            '#dc3545',
+                            '#6c1721'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            }
+        );
+        
+        const historyChart = new Chart(
+            document.getElementById('history-chart'),
+            {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Temperature (°C)',
+                            data: [],
+                            borderColor: 'red',
+                            fill: false
+                        },
+                        {
+                            label: 'Humidity (%)',
+                            data: [],
+                            borderColor: 'blue',
+                            fill: false
+                        },
+                        {
+                            label: 'Precipitation (mm)',
+                            data: [],
+                            borderColor: 'green',
+                            fill: false
+                        },
+                        {
+                            label: 'Soil Moisture (%)',
+                            data: [],
+                            borderColor: 'brown',
+                            fill: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'hour'
+                            }
+                        }
+                    }
+                }
+            }
+
+        );
+            
+        
